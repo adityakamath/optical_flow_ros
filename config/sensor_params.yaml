@@ -1,0 +1,16 @@
+optical_flow:
+    ros__parameters:
+        odom_topic: odom
+        timer_period: 0.01 # min 0.01
+        sensor_timeout: 0.5
+        parent_frame: odom
+        child_frame: base_link
+        x_init: 0.0
+        y_init: 0.0
+        z_height: 0.025
+        theta_init: 0.0
+        board: paa5100 # [pmw3901, paa5100]
+        spi_nr: 0
+        spi_slot: front # [front, back]
+        rotation: 0 # [0, 90, 180, 270]
+        publish_tf: true
