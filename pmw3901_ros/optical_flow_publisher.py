@@ -72,14 +72,12 @@ class OpticalFlowPublisher(Node):
             self._pos_y += dy
             self._theta += dtheta
 
-            orientation = np.quaternion(0.0, 0.0, theta)
-
             odom_msg = Odometry()
             odom_msg.header.stamp    = self.get_clock().now().to_msg()
             odom_msg.header.frame_id = self.get_parameter('parent_frame').value
             odom_msg.child_frame_id  = self.get_parameter('child_frame').value
-            odom_msg.pose.pose.position = Point(x=pos_x, y=pos_y, z=pos_z)
-            odom_msg.pose.pose.orientation = Quaternion(x=orientation[0], y=orientation[1], z=orientation[2], w=orientation[3])
+            odom_msg.pose.pose.position = Point(x=self._pos_x, y=self._pos_y, z=self._pos_z)
+            odom_msg.pose.pose.orientation = Quaternion(x=0.0, y=0.0, z=np.sin(self._theta/2.0), w=np.cos(self._theta/2.0))
             odom_msg.twist.twist.linear = Vector3(x=dx/self._dt, y=dy/self._dt, z=0.0)
             odom_msg.twist.twist.angular = Vector3(x=0.0, y=0.0, z=dtheta/self._dt)
             
