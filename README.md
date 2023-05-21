@@ -1,7 +1,7 @@
 # pmw3901_ros
 ROS 2 node for the [PMW3901](https://shop.pimoroni.com/products/pmw3901-optical-flow-sensor-breakout?variant=27869870358611) optical flow sensor and it's short-range variant [PAA5100](https://shop.pimoroni.com/products/paa5100je-optical-tracking-spi-breakout?variant=39315330170963) from Pimoroni.
 
-Note: This implementation is a bit over-designed, as I have been experimenting with ROS 2 [managed/lifecycle](https://design.ros2.org/articles/node_lifecycle.html) nodes, [executors](https://docs.ros.org/en/humble/Concepts/About-Executors.html#executors) and [composition](https://github.com/ros2/examples/blob/rolling/rclpy/executors/examples_rclpy_executors/composed.py) using Python.
+Note: This implementation is a bit over-engineered, as I have been experimenting with ROS 2 [managed/lifecycle](https://design.ros2.org/articles/node_lifecycle.html) nodes, [executors](https://docs.ros.org/en/humble/Concepts/About-Executors.html#executors) and [composition](https://github.com/ros2/examples/blob/rolling/rclpy/executors/examples_rclpy_executors/composed.py) using Python.
 
 ## Implementation details
 
@@ -9,7 +9,7 @@ Note: This implementation is a bit over-designed, as I have been experimenting w
 
 * ```optical_flow_node```: This executable creates an instance of ```optical_flow_publisher``` and runs it using a single threaded executor. 
 
-* ```optical_flow_launch.py```: This is the launch file that launches ```optical_flow_node``` as a  lifecycle node, loads its parameters, and then configures and activates it.
+* ```optical_flow_launch.py```: This is the launch file that launches ```optical_flow_node``` as a  lifecycle node, loads its parameters, and then configures and activates it. The lifecycle node is first initialized, then set to 'configure' from the launch file. When the 'inactive' state is reached, the registered event handler activates the node.
 
 ## Parameters
 
@@ -39,8 +39,8 @@ Note: This implementation is a bit over-designed, as I have been experimenting w
   * INT to BCM 19
   * GND to any ground pin
 * Install the pmw3901-python library: ```sudo pip install pmw3901```
-* Clone this repository in a ROS 2 workspace. Check the ```sensor_params.yaml``` file in the config directory, and make any necessary changes.
-* Build the package and run the launch file: ```ros2 launch pmw3901_ros optical_flow_launch.py```. The lifecycle node is first initialized, then set to 'configure' from the launch file. In the launch file, the registered event handler sets the event to 'activate' when the 'inactive' (i.e. configured) state is reached. All of this should be visible on the terminal as logged messages. The odometry messages can be seen by echoing the ```/optical_flow_odom``` topic (the launch file remaps the output topic from ```/odom```), and the transform can be seen by echoing ```/tf```
+* Clone this repository in a ROS 2 workspace. Check the ```sensor_params.yaml``` file in the config directory, and make any necessary changes
+* Build the package and run the launch file: ```ros2 launch pmw3901_ros optical_flow_launch.py```
 
 ## Results
 
