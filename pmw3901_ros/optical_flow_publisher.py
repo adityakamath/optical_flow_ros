@@ -21,8 +21,9 @@ from rclpy.timer import Timer
 from rclpy.executors import ExternalShutdownException
 from rclpy.qos import qos_profile_sensor_data
 from tf2_ros import TransformBroadcaster
+from std_msgs.msg import Header
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Point, Quaternion, Vector3, TransformStamped
+from geometry_msgs.msg import PoseWithCovariance, TwistWithCovariance, Pose, Twist, Point, Quaternion, Vector3, TransformStamped, Transform
 from pmw3901 import PMW3901, PAA5100, BG_CS_FRONT_BCM, BG_CS_BACK_BCM
 
 class OpticalFlowPublisher(Node):
@@ -72,26 +73,36 @@ class OpticalFlowPublisher(Node):
             self._pos_y += dy
             self._theta += dtheta
 
-            odom_msg = Odometry()
-            odom_msg.header.stamp    = self.get_clock().now().to_msg()
-            odom_msg.header.frame_id = self.get_parameter('parent_frame').value
-            odom_msg.child_frame_id  = self.get_parameter('child_frame').value
-            odom_msg.pose.pose.position = Point(x=self._pos_x, y=self._pos_y, z=self._pos_z)
-            odom_msg.pose.pose.orientation = Quaternion(x=0.0, y=0.0, z=np.sin(self._theta/2.0), w=np.cos(self._theta/2.0))
-            odom_msg.twist.twist.linear = Vector3(x=dx/self._dt, y=dy/self._dt, z=0.0)
-            odom_msg.twist.twist.angular = Vector3(x=0.0, y=0.0, z=dtheta/self._dt)
-            
+            odom_msg = Odometry(
+                header = Header(
+                    stamp = self.get_clock().now().to_msg(),
+                    frame_id = self.get_parameter('parent_frame').value
+                ),
+                child_frame_id = self.get_parameter('child_frame').value,
+                pose = PoseWithCovariance(
+                    pose = Pose(
+                        position = Point(x=self._pos_x, y=self._pos_y, z=self._pos_z),
+                        orientation = Quaternion(x=0.0, y=0.0, z=np.sin(self._theta/2.0), w=np.cos(self._theta/2.0)))
+                ),
+                twist = TwistWithCovariance(
+                    twist = Twist(
+                        linear = Vector3(x=dx/self._dt, y=dy/self._dt, z=0.0),
+                        angular = Vector3(x=0.0, y=0.0, z=dtheta/self._dt))
+                ),
+            )
             self._odom_pub.publish(odom_msg)
 
             if self.get_parameter('publish_tf').value is True:
-                tf_msg = TransformStamped()
-                tf_msg.header = odom_msg.header
-                tf_msg.child_frame_id = odom_msg.child_frame_id
-                tf_msg.transform.translation = Vector3(x=odom_msg.pose.pose.position.x,
-                                                   y=odom_msg.pose.pose.position.y,
-                                                   z=odom_msg.pose.pose.position.z)
-                tf_msg.transform.rotation = odom_msg.pose.pose.orientation
-            
+                tf_msg = TransformStamped(
+                    header = odom_msg.header,
+                    child_frame_id = odom_msg.child_frame_id,
+                    transform = Transform(
+                        translation = Vector3(x=odom_msg.pose.pose.position.x,
+                                              y=odom_msg.pose.pose.position.y,
+                                              z=odom_msg.pose.pose.position.z),
+                        rotation = odom_msg.pose.pose.orientation
+                    ),
+                )
                 self._tf_broadcaster.sendTransform(tf_msg)
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:

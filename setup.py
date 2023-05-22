@@ -19,7 +19,7 @@ setup(
     zip_safe=True,
     maintainer='Aditya Kamath',
     maintainer_email='adityakamath@live.com',
-    description='ROS 2 Node for Optical Flow Sensors - PMW3901 and the short range variant PAA5100',
+    description='ROS 2 Node for Optical Flow Sensors - PMW3901 and its short-range variant PAA5100',
     license='Apache License 2.0',
     tests_require=['pytest'],
     entry_points={

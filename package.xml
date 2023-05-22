@@ -3,7 +3,7 @@
 <package format="3">
   <name>pmw3901_ros</name>
   <version>0.0.0</version>
-  <description>ROS 2 Node for Optical Flow Sensors - PMW3901, PAA5100 (short range variant)</description>
+  <description>ROS 2 Node for Optical Flow Sensors - PMW3901 and its short-range variant PAA5100</description>
   <maintainer email="adityakamath@live.com">Aditya Kamath</maintainer>
   <license>Apache License 2.0</license>
     
@@ -12,6 +12,7 @@
   <depend>rclpy</depend>
   <depend>nav_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>lifecycle_msgs</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
