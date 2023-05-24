@@ -1,7 +1,6 @@
 # pmw3901_ros
 ROS 2 node for the [PMW3901](https://shop.pimoroni.com/products/pmw3901-optical-flow-sensor-breakout?variant=27869870358611) optical flow sensor and it's short-range variant [PAA5100](https://shop.pimoroni.com/products/paa5100je-optical-tracking-spi-breakout?variant=39315330170963).
 
-
 Note: This implementation is a bit over-engineered, as I have been experimenting with ROS 2 [managed/lifecycle](https://design.ros2.org/articles/node_lifecycle.html) nodes, [executors](https://docs.ros.org/en/humble/Concepts/About-Executors.html#executors) and [composition](https://github.com/ros2/examples/blob/rolling/rclpy/executors/examples_rclpy_executors/composed.py) using Python.
 
 ## Implementation details
@@ -14,7 +13,7 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 
 ## Parameters
 
-* ```odom_topic```: Odometry message topic name (Default: odom)
+* ```odom_topic```: Odometry topic name (Default: odom)
 * ```timer_period```: Timer period in seconds (Default: 0.01)
 * ```sensor_timeout```: Sensor timeout in seconds in case of no movement, or sensor failure (Default: 1.0)
 * ```parent_frame```: Parent frame for the Odometry message and Transform (Default: odom)
@@ -32,7 +31,7 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 ## How to use
 
 * Connect the sensor breakout (PMW3901 or PAA5100) to the SPI GPIO pins of a Raspberry Pi device:
-  * 3-5V to any 3.3V pin
+  * 3-5V to a 3.3V pin
   * CS to BCM 7
   * SCK to BCM 11
   * MOSI to BCM 10
@@ -40,7 +39,7 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
   * INT to BCM 19
   * GND to any ground pin
 * Install the pmw3901-python library: ```sudo pip install pmw3901```
-* Clone this repository in a ROS 2 workspace. Check the ```sensor_params.yaml``` file in the config directory, and make any necessary changes
+* Clone this repository in a ROS 2 workspace. Check the ```sensor_params.yaml``` file in the config directory, and make any necessary changes.
 * Build the package and run the launch file: ```ros2 launch pmw3901_ros optical_flow_launch.py```
 
 ## Results
@@ -49,9 +48,5 @@ This package was tested using a [PAA5100JE Near Optical Flow sensor](https://sho
 * A Raspberry Pi 4 (8GB) running Ubuntu 22.04 with a real-time kernel
 * A Raspberry Pi Zero 2 W running Ubuntu 22.04 without any kernel modifications
 In both cases, the output frequency of 100Hz was achieved. 
-
-
-
-
 
 
