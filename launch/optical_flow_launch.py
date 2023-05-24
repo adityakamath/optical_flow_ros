@@ -35,7 +35,7 @@ def generate_launch_description():
         namespace='', # Do not change, else config params and remappings need to be updated
         output='screen',
         parameters=[optical_flow_params_path],
-        remappings=[('odom', 'optical_flow_odom')])
+        remappings=[('odom', 'flow_odom')])
 
     emit_configure_event = EmitEvent(
         event=ChangeState(
