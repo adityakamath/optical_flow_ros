@@ -1,11 +1,12 @@
 # pmw3901_ros
 ROS 2 node for the [PMW3901](https://shop.pimoroni.com/products/pmw3901-optical-flow-sensor-breakout?variant=27869870358611) optical flow sensor and it's short-range variant [PAA5100](https://shop.pimoroni.com/products/paa5100je-optical-tracking-spi-breakout?variant=39315330170963).
 
+
 Note: This implementation is a bit over-engineered, as I have been experimenting with ROS 2 [managed/lifecycle](https://design.ros2.org/articles/node_lifecycle.html) nodes, [executors](https://docs.ros.org/en/humble/Concepts/About-Executors.html#executors) and [composition](https://github.com/ros2/examples/blob/rolling/rclpy/executors/examples_rclpy_executors/composed.py) using Python.
 
 ## Implementation details
 
-* ```optical_flow_publisher```: This executable uses the [pmw3901-python](https://github.com/pimoroni/pmw3901-python) library to access sensor data over SPI. The delta X and Y measurements from the sensor are converted to 2D odometry data, which is published periodically using a timer as an [Odometry](https://docs.ros2.org/foxy/api/nav_msgs/msg/Odometry.html) message to the ```/odom``` topic and as a [transform broadcast](https://ros2-industrial-workshop.readthedocs.io/en/latest/_source/navigation/ROS2-TF2.html) to ```/tf```. The odometry publisher uses the [Sensor Data QoS profile](https://docs.ros.org/en/rolling/Concepts/About-Quality-of-Service-Settings.html#qos-profiles) as default. This implementation is designed as a lifecycle component and can be run individually as a node. 
+* ```optical_flow_publisher```: This executable uses the [pmw3901-python](https://github.com/pimoroni/pmw3901-python) library to access sensor data over SPI. The delta X and Y measurements from the sensor are converted to 2D odometry data, which is published periodically using a timer as an [Odometry](https://docs.ros2.org/foxy/api/nav_msgs/msg/Odometry.html) message to the ```/odom``` topic and as a [transform broadcast](https://ros2-industrial-workshop.readthedocs.io/en/latest/_source/navigation/ROS2-TF2.html) to ```/tf```. The odometry publisher uses the [Sensor Data QoS profile](https://docs.ros.org/en/rolling/Concepts/About-Quality-of-Service-Settings.html#qos-profiles) as default. This implementation is designed as a lifecycle component and can be run individually as well. 
 
 * ```optical_flow_node```: This executable creates an instance of ```optical_flow_publisher``` and runs it using a single threaded executor. 
 
@@ -13,7 +14,7 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 
 ## Parameters
 
-* ```odom_topic```: Odometry topic name (Default: odom)
+* ```odom_topic```: Odometry message topic name (Default: odom)
 * ```timer_period```: Timer period in seconds (Default: 0.01)
 * ```sensor_timeout```: Sensor timeout in seconds in case of no movement, or sensor failure (Default: 1.0)
 * ```parent_frame```: Parent frame for the Odometry message and Transform (Default: odom)
@@ -31,7 +32,7 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 ## How to use
 
 * Connect the sensor breakout (PMW3901 or PAA5100) to the SPI GPIO pins of a Raspberry Pi device:
-  * 3-5V to a 3.3V pin
+  * 3-5V to any 3.3V pin
   * CS to BCM 7
   * SCK to BCM 11
   * MOSI to BCM 10
