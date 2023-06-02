@@ -41,8 +41,10 @@ class OpticalFlowPublisher(Node):
         self.declare_parameter('x_init', 0.0)
         self.declare_parameter('y_init', 0.0)
         self.declare_parameter('z_height', 0.025)
-        self.declare_parameter('theta_init', 0.0)
         self.declare_parameter('board', 'paa5100')
+        self.declare_parameter('fov_deg', 42.0)
+        self.declare_parameter('res_px', 35)
+        self.declare_parameter('scaler', 5)
         self.declare_parameter('spi_nr', 0)
         self.declare_parameter('spi_slot', 'front')
         self.declare_parameter('rotation', 0)
@@ -51,7 +53,9 @@ class OpticalFlowPublisher(Node):
         self._pos_x = self.get_parameter('x_init').value
         self._pos_y = self.get_parameter('y_init').value
         self._pos_z = self.get_parameter('z_height').value
-        self._theta = self.get_parameter('theta_init').value
+        self._fov = self.get_parameter('fov_deg').value
+        self._res = self.get_parameter('res_px').value
+        self._scaler = self.get_parameter('scaler').value
         self._dt = self.get_parameter('timer_period').value
         self._sensor = None
         
@@ -60,18 +64,22 @@ class OpticalFlowPublisher(Node):
     def publish_odom(self):
         if self._odom_pub is not None and self._odom_pub.is_activated:
             try:
-                x, y = self._sensor.get_motion(timeout=self.get_parameter('sensor_timeout').value)
+                dx, dy = self._sensor.get_motion(timeout=self.get_parameter('sensor_timeout').value)
             except (RuntimeError, AttributeError):
-                x, y = 0.0, 0.0
-        
-            #TODO: x, y from sensor readings to dx/dy in meters. For now:
-            dx = x
-            dy = y
-            dtheta = np.arctan2(dy, dx)
+                dx, dy = 0.0, 0.0
+
+            fov = np.radians(self._fov)
+            cf = self._pos_z*2*np.tan(fov/2)/(self._res*self._scaler)
+
+            # Convert data from sensor frame to ROS frame
+            # ROS frame: front/back = +x/-x, left/right = +y/-y
+            # Sensor frame: front/back = -y/+y, left/right = +x/-x
+            # With the sensor facing downwards, the side with the holes is front, the side with the pins is back
+            dist_x = -1*cf*dy
+            dist_y = cf*dx
             
-            self._pos_x += dx
-            self._pos_y += dy
-            self._theta += dtheta
+            self._pos_x += dist_x
+            self._pos_y += dist_y
 
             odom_msg = Odometry(
                 header = Header(
@@ -80,14 +88,10 @@ class OpticalFlowPublisher(Node):
                 ),
                 child_frame_id = self.get_parameter('child_frame').value,
                 pose = PoseWithCovariance(
-                    pose = Pose(
-                        position = Point(x=self._pos_x, y=self._pos_y, z=self._pos_z),
-                        orientation = Quaternion(x=0.0, y=0.0, z=np.sin(self._theta/2.0), w=np.cos(self._theta/2.0)))
+                    pose = Pose(position = Point(x=self._pos_x, y=self._pos_y, z=self._pos_z))
                 ),
                 twist = TwistWithCovariance(
-                    twist = Twist(
-                        linear = Vector3(x=dx/self._dt, y=dy/self._dt, z=0.0),
-                        angular = Vector3(x=0.0, y=0.0, z=dtheta/self._dt))
+                    twist = Twist(linear = Vector3(x=dist_x/self._dt, y=dist_y/self._dt, z=0.0))
                 ),
             )
             self._odom_pub.publish(odom_msg)

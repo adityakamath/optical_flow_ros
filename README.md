@@ -11,6 +11,13 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 
 * ```optical_flow_launch.py```: This is the launch file that launches ```optical_flow_node``` as a  lifecycle node, loads its parameters, and then configures and activates it. The lifecycle node is first initialized, then set to 'configure' from the launch file. When the 'inactive' state is reached, the registered event handler activates the node.
 
+## Improvements (To Do)
+* Rotations: The publisher assumes that the sensor is placed at a fixed height parallel to the ground (within the range of the respective sensor), and currently does not account for any rotations in any axis. Rotations in x and y directions (roll and pitch) can be accounted for using the explanation [here](https://ardupilot.org/copter/docs/common-mouse-based-optical-flow-sensor-adns3080.html) and in this [thesis report](https://lup.lub.lu.se/luur/download?func=downloadFile&recordOId=8905295&fileOId=8905299) referenced in the [Bitcraze PMW3901 driver](https://github.com/bitcraze/Bitcraze_PMW3901/tree/master)
+
+* Scaling Factor: For a single pixel move, the sensor returns a value of more than 1. This is the scaling factor or simply *scaler*. This scaler value seems to be proprietary and cannot be found anywhere online, and most references mention an NDA with the sensor manufacturer. This can be calculated by moving the sensor for a known distance and comparing it with the distance measured by the sensor at a fixed height. This still needs to be done once a fixed mount is designed for the sensor. It is also unknown if the scaler value will change for different sensor heights.
+
+* PMW3901: This implementation has been tested with the PAA5100 Near Optical Flow sensor but still needs to be tested with the PMW3901 sensor. There may be some differences such as resolution in pixels. Since the used library defines the raw data length to be 1225 (i.e 35x35), a default resolution of 35 is used. However, some online implementations define the resolution of PMW3901 as 30x30. This needs to be verified. 
+
 ## Parameters
 
 * ```odom_topic```: Odometry topic name (Default: odom)
@@ -21,8 +28,10 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 * ```x_init```: Initial position in the X axis, in meters (Default: 0.0)
 * ```y_init```: Initial position in the Y axis, in meters (Default: 0.0)
 * ```z_height```: Height of the sensor from the ground, in meters (Default: 0.025)
-* ```theta_init```: Initial orientation around the Z axis, in radians (Default: 0.0)
 * ```board```: Sensor type - pmw3901 or paa5100 (Default: paa5100)
+* ```fov_deg```: FOV of the sensor aperture in degrees (Default: 42 for PMW3901/PAA5100)
+* ```res_px```: Resolution of the sensor in pixels, assuming the same value in both directions (Default: 35 for PMW3901/PAA5100)
+* ```scaler```: Scaling factor, i.e. the sensor value returned for 1 pixel move (Default: 5)
 * ```spi_nr```: SPI port number (Default: 0)
 * ```spi_slot```: SPI CS pin - front (BCM pin 7 on RPi) or back (BCM pin 8 on RPi) (Default: front)
 * ```rotation```: Rotation of the sensor in 90 degree increments - 0, 90, 180, 270 (Default: 270)
