@@ -71,12 +71,17 @@ class OpticalFlowPublisher(Node):
             fov = np.radians(self._fov)
             cf = self._pos_z*2*np.tan(fov/2)/(self._res*self._scaler)
 
-            # Convert data from sensor frame to ROS frame
-            # ROS frame: front/back = +x/-x, left/right = +y/-y
-            # Sensor frame: front/back = -y/+y, left/right = +x/-x
-            # With the sensor facing downwards, the side with the holes is front, the side with the pins is back
-            dist_x = -1*cf*dy
-            dist_y = cf*dx
+            dist_x, dist_y = 0.0, 0.0
+            if self.get_parameter('board').value == 'paa5100':
+                # Convert data from sensor frame to ROS frame for PAA5100
+                # ROS frame: front/back = +x/-x, left/right = +y/-y
+                # Sensor frame: front/back = -y/+y, left/right = +x/-x
+                dist_x = -1*cf*dy
+                dist_y = cf*dx
+            elif self.get_parameter('board').value == 'pmw3901':
+                # ROS and Sensor frames are assumed to align for PMW3901 based on https://docs.px4.io/main/en/sensor/pmw3901.html#mounting-orientation
+                dist_x = cf*dx
+                dist_y = cf*dy
             
             self._pos_x += dist_x
             self._pos_y += dist_y
@@ -100,12 +105,9 @@ class OpticalFlowPublisher(Node):
                 tf_msg = TransformStamped(
                     header = odom_msg.header,
                     child_frame_id = odom_msg.child_frame_id,
-                    transform = Transform(
-                        translation = Vector3(x=odom_msg.pose.pose.position.x,
-                                              y=odom_msg.pose.pose.position.y,
-                                              z=odom_msg.pose.pose.position.z),
-                        rotation = odom_msg.pose.pose.orientation
-                    ),
+                    transform = Transform(translation = Vector3(x=odom_msg.pose.pose.position.x,
+                                                                y=odom_msg.pose.pose.position.y,
+                                                                z=odom_msg.pose.pose.position.z)),
                 )
                 self._tf_broadcaster.sendTransform(tf_msg)
 
