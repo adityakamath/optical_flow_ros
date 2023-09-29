@@ -33,7 +33,6 @@ class OpticalFlowPublisher(Node):
         self._tf_broadcaster: Optional[TransformBroadcaster] = None
         self._timer: Optional[Timer] = None
         
-        self.declare_parameter('odom_topic', 'odom')
         self.declare_parameter('timer_period', 0.01)
         self.declare_parameter('sensor_timeout', 1.0)
         self.declare_parameter('parent_frame', 'odom')
@@ -123,9 +122,7 @@ class OpticalFlowPublisher(Node):
 
             if self._sensor is not None:
                 qos_profile = qos_profile_sensor_data
-                self._odom_pub = self.create_lifecycle_publisher(Odometry, 
-                                                                self.get_parameter('odom_topic').value, 
-                                                                qos_profile=qos_profile)
+                self._odom_pub = self.create_lifecycle_publisher(Odometry, 'odom', qos_profile=qos_profile)
                 self._tf_broadcaster = TransformBroadcaster(self)
                 self._timer = self.create_timer(self._dt, self.publish_odom)
             
