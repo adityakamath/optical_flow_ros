@@ -1,6 +1,5 @@
 optical_flow:
     ros__parameters:
-        odom_topic: odom
         timer_period: 0.01 # min 0.01
         sensor_timeout: 0.5
         parent_frame: odom
