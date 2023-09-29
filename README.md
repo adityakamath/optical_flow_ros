@@ -13,7 +13,6 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 
 ## Parameters
 
-* ```odom_topic```: Odometry topic name (Default: odom)
 * ```timer_period```: Timer period in seconds (Default: 0.01)
 * ```sensor_timeout```: Sensor timeout in seconds in case of no movement, or sensor failure (Default: 1.0)
 * ```parent_frame```: Parent frame for the Odometry message and Transform (Default: odom)
