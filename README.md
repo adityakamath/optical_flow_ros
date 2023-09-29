@@ -40,6 +40,7 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
   * INT to BCM 19
   * GND to any ground pin
 * Install the pmw3901-python library: ```sudo pip install pmw3901```
+* Install the RPi.GPIO library: ```sudo pip install RPi.GPIO```
 * Clone this repository in a ROS 2 workspace. Check the ```sensor_params.yaml``` file in the config directory, and make any necessary changes.
 * Build the package and run the launch file: ```ros2 launch pmw3901_ros optical_flow_launch.py```
 
