@@ -45,7 +45,7 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 ## Results
 
 This package was tested using a [PAA5100JE Near Optical Flow sensor](https://shop.pimoroni.com/products/paa5100je-optical-tracking-spi-breakout?variant=39315330170963) from Pimoroni and ROS 2 Humble on two devices:
-* A Raspberry Pi 4 (8GB) running Ubuntu 22.04 with a real-time kernel
+* A Raspberry Pi 4 (4GB) running Ubuntu 22.04 with a real-time kernel
 * A Raspberry Pi Zero 2 W running Ubuntu 22.04 without any kernel modifications
 In both cases, the output frequency of 100Hz was achieved. 
 
