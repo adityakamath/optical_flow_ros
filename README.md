@@ -21,8 +21,6 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 * ```y_init```: Initial position in the Y axis, in meters (Default: 0.0)
 * ```z_height```: Height of the sensor from the ground, in meters (Default: 0.025)
 * ```board```: Sensor type - pmw3901 or paa5100 (Default: paa5100)
-* ```fov_deg```: FOV of the sensor aperture in degrees (Default: 42 for PMW3901/PAA5100)
-* ```res_px```: Resolution of the sensor in pixels, assuming the same value in both directions (Default: 35 for PMW3901/PAA5100)
 * ```scaler```: Scaling factor, i.e. the sensor value returned for 1 pixel move (Default: 5)
 * ```spi_nr```: SPI port number (Default: 0)
 * ```spi_slot```: SPI CS pin - front (BCM pin 7 on RPi) or back (BCM pin 8 on RPi) (Default: front)
@@ -57,7 +55,7 @@ In both cases, the output frequency of 100Hz was achieved.
 
 * Scaling Factor: For a single pixel move, the sensor returns a value of more than 1. This is the scaling factor or simply *scaler*. This scaler value seems to be proprietary and cannot be found anywhere online, and most references mention an NDA with the sensor manufacturer. This can be calculated by moving the sensor for a known distance and comparing it with the distance measured by the sensor at a fixed height. This still needs to be done once a fixed mount is designed for the sensor. It is also unknown if the scaler value will change for different sensor heights.
 
-* PMW3901: This implementation has been tested with the PAA5100 Near Optical Flow sensor but still needs to be tested with the PMW3901 sensor. There may be some differences such as resolution in pixels. Since the used library defines the raw data length to be 1225 (i.e 35x35), a default resolution of 35 is used. However, some online implementations define the resolution of PMW3901 as 30x30. Another issue is the orientation - for PMW3901, [this](https://docs.px4.io/main/en/sensor/pmw3901.html) document states that the notch on the sensor indicates the back of the board. However, for PAA5100, the frame seems to be rotated 90 degrees counterclockwise. This is accounted for in the software, for PMW3901, the default orientation is assumed, and for PAA5100, a rotation transformation is applied. Both these issues need to be checked practically with the PMW3901 sensor.
+* PMW3901: This implementation has been tested with the PAA5100 Near Optical Flow sensor but still needs to be tested with the PMW3901 sensor. There may be some differences such as resolution in pixels. Since the used library defines the raw data length to be 1225 (i.e 35x35), a default resolution of 35 is hard-coded in the publisher implementation (similarly the FOV is hard-coded as 42 degrees). However, some online implementations define the resolution of PMW3901 as 30x30. Another issue is the orientation - for PMW3901, [this](https://docs.px4.io/main/en/sensor/pmw3901.html) document states that the notch on the sensor indicates the back of the board. However, for PAA5100, the frame seems to be rotated 90 degrees counterclockwise. This is accounted for in the software, for PMW3901, the default orientation is assumed, and for PAA5100, a rotation transformation is applied. Both these issues need to be checked practically with the PMW3901 sensor.
 
 ## Challenges
 
