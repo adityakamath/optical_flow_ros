@@ -26,6 +26,10 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseWithCovariance, TwistWithCovariance, Pose, Twist, Point, Quaternion, Vector3, TransformStamped, Transform
 from pmw3901 import PMW3901, PAA5100, BG_CS_FRONT_BCM, BG_CS_BACK_BCM
 
+# hard-coded values for PAA5100 and PMW3901 (to be verified for PMW3901)
+FOV_DEG = 42.0
+RES_PIX = 35
+
 class OpticalFlowPublisher(Node):
     def __init__(self, node_name='optical_flow'):
         super().__init__(node_name)
@@ -45,8 +49,6 @@ class OpticalFlowPublisher(Node):
                 ('y_init', 0.0),
                 ('z_height', 0.025),
                 ('board', 'paa5100'),
-                ('fov_deg', 42.0),
-                ('res_px', 35),
                 ('scaler', 5),
                 ('spi_nr', 0),
                 ('spi_slot', 'front'),
@@ -58,8 +60,6 @@ class OpticalFlowPublisher(Node):
         self._pos_x = self.get_parameter('x_init').value
         self._pos_y = self.get_parameter('y_init').value
         self._pos_z = self.get_parameter('z_height').value
-        self._fov = self.get_parameter('fov_deg').value
-        self._res = self.get_parameter('res_px').value
         self._scaler = self.get_parameter('scaler').value
         self._dt = self.get_parameter('timer_period').value
         self._sensor = None
@@ -73,8 +73,8 @@ class OpticalFlowPublisher(Node):
             except (RuntimeError, AttributeError):
                 dx, dy = 0.0, 0.0
 
-            fov = np.radians(self._fov)
-            cf = self._pos_z*2*np.tan(fov/2)/(self._res*self._scaler)
+            fov = np.radians(FOV_DEV)
+            cf = self._pos_z*2*np.tan(fov/2)/(RES_PIX*self._scaler)
 
             dist_x, dist_y = 0.0, 0.0
             if self.get_parameter('board').value == 'paa5100':
