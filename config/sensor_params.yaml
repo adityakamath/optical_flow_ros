@@ -13,5 +13,3 @@ optical_flow:
         spi_slot: front # [front, back]
         rotation: 0 # [0, 90, 180, 270]
         publish_tf: true
-        # fov_deg: 42.0 # Fixed value for both PAA5100/PMW3901
-        # res_px: 35 # Fixed value for PAA5100, to be verified for PMW3901
