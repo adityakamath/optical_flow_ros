@@ -32,22 +32,28 @@ class OpticalFlowPublisher(Node):
         self._odom_pub: Optional[Publisher] = None
         self._tf_broadcaster: Optional[TransformBroadcaster] = None
         self._timer: Optional[Timer] = None
-        
-        self.declare_parameter('timer_period', 0.01)
-        self.declare_parameter('sensor_timeout', 1.0)
-        self.declare_parameter('parent_frame', 'odom')
-        self.declare_parameter('child_frame', 'base_link')
-        self.declare_parameter('x_init', 0.0)
-        self.declare_parameter('y_init', 0.0)
-        self.declare_parameter('z_height', 0.025)
-        self.declare_parameter('board', 'paa5100')
-        self.declare_parameter('fov_deg', 42.0)
-        self.declare_parameter('res_px', 35)
-        self.declare_parameter('scaler', 5)
-        self.declare_parameter('spi_nr', 0)
-        self.declare_parameter('spi_slot', 'front')
-        self.declare_parameter('rotation', 0)
-        self.declare_parameter('publish_tf', True)
+
+        # declare parameters and default values
+        self.declare_parameters(
+            namespace='',
+            parameters=[
+                ('timer_period', 0.01),
+                ('sensor_timeout', 1.0),
+                ('parent_frame', 'odom'),
+                ('child_frame', 'base_link'),
+                ('x_init', 0.0),
+                ('y_init', 0.0),
+                ('z_height', 0.025),
+                ('board', 'paa5100'),
+                ('fov_deg', 42.0),
+                ('res_px', 35),
+                ('scaler', 5),
+                ('spi_nr', 0),
+                ('spi_slot', 'front'),
+                ('rotation', 0),
+                ('publish_tf', True),
+            ]
+        )
         
         self._pos_x = self.get_parameter('x_init').value
         self._pos_y = self.get_parameter('y_init').value
@@ -121,8 +127,7 @@ class OpticalFlowPublisher(Node):
             self._sensor.set_rotation(self.get_parameter('rotation').value)
 
             if self._sensor is not None:
-                qos_profile = qos_profile_sensor_data
-                self._odom_pub = self.create_lifecycle_publisher(Odometry, 'odom', qos_profile=qos_profile)
+                self._odom_pub = self.create_lifecycle_publisher(Odometry, 'odom', qos_profile=qos_profile_sensor_data)
                 self._tf_broadcaster = TransformBroadcaster(self)
                 self._timer = self.create_timer(self._dt, self.publish_odom)
             
