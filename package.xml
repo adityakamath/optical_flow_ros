@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>pmw3901_ros</name>
+  <name>optical_flow_ros</name>
   <version>0.0.0</version>
-  <description>ROS 2 package for Optical Flow Sensors - PMW3901 and its short-range variant PAA5100</description>
+  <description>ROS 2 package for PMW3901 and PAA5100 (short-range) Optical Flow Sensors</description>
   <maintainer email="adityakamath@live.com">Aditya Kamath</maintainer>
   <license>Apache License 2.0</license>
     

@@ -1,4 +1,4 @@
-# pmw3901_ros
+# optical_flow_ros
 ROS 2 package for the [PMW3901](https://shop.pimoroni.com/products/pmw3901-optical-flow-sensor-breakout?variant=27869870358611) optical flow sensor and it's short-range variant [PAA5100](https://shop.pimoroni.com/products/paa5100je-optical-tracking-spi-breakout?variant=39315330170963).
 
 Note: This implementation is a bit over-engineered, as I have been experimenting with ROS 2 [managed/lifecycle](https://design.ros2.org/articles/node_lifecycle.html) nodes, [executors](https://docs.ros.org/en/humble/Concepts/About-Executors.html#executors) and [composition](https://github.com/ros2/examples/blob/rolling/rclpy/executors/examples_rclpy_executors/composed.py) using Python.
@@ -40,7 +40,7 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 * Install the pmw3901-python library: ```sudo pip install pmw3901```
 * Install the RPi.GPIO library: ```sudo pip install RPi.GPIO```
 * Clone this repository in a ROS 2 workspace. Check the ```sensor_params.yaml``` file in the config directory, and make any necessary changes.
-* Build the package and run the launch file: ```ros2 launch pmw3901_ros optical_flow_launch.py```
+* Build the package and run the launch file: ```ros2 launch optical_flow_ros optical_flow_launch.py```
 
 ## Results
 

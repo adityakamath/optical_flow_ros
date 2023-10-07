@@ -16,7 +16,7 @@ import sys
 import rclpy
 from rclpy.executors import ExternalShutdownException
 from rclpy.executors import SingleThreadedExecutor
-from pmw3901_ros.optical_flow_publisher import OpticalFlowPublisher
+from optical_flow_ros.optical_flow_publisher import OpticalFlowPublisher
 
 def main(args=None):
     rclpy.init(args=args)

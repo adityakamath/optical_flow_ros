@@ -2,7 +2,7 @@ import os
 from glob import glob
 from setuptools import setup
 
-package_name = 'pmw3901_ros'
+package_name = 'optical_flow_ros'
 
 setup(
     name=package_name,
@@ -19,13 +19,13 @@ setup(
     zip_safe=True,
     maintainer='Aditya Kamath',
     maintainer_email='adityakamath@live.com',
-    description='ROS 2 package for Optical Flow Sensors - PMW3901 and its short-range variant PAA5100',
+    description='ROS 2 package for PMW3901 and PAA5100 (short-range) Optical Flow Sensors',
     license='Apache License 2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'optical_flow_publisher = pmw3901_ros.optical_flow_publisher:main',
-            'optical_flow_node = pmw3901_ros.optical_flow_node:main',
+            'optical_flow_publisher = optical_flow.optical_flow_publisher:main',
+            'optical_flow_node = optical_flow.optical_flow_node:main',
         ],
     },
 )

@@ -26,10 +26,10 @@ def generate_launch_description():
     ld = LaunchDescription()
     
     optical_flow_params_path = PathJoinSubstitution(
-        [FindPackageShare("pmw3901_ros"), "config", "sensor_params.yaml"])
+        [FindPackageShare("optical_flow_ros"), "config", "sensor_params.yaml"])
            
     optical_flow_node = LifecycleNode(
-        package='pmw3901_ros',
+        package='optical_flow_ros',
         executable='optical_flow_node',
         name='optical_flow',
         namespace='', # Do not change, else config params and remappings need to be updated
