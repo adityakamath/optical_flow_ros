@@ -7,8 +7,6 @@
   <maintainer email="adityakamath@live.com">Aditya Kamath</maintainer>
   <license>Apache License 2.0</license>
     
-  <buildtool_depend>ament_python</buildtool_depend>
-    
   <depend>rclpy</depend>
   <depend>nav_msgs</depend>
   <depend>geometry_msgs</depend>
