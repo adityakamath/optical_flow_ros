@@ -13,19 +13,19 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 
 ## Parameters
 
-* ```timer_period```: Timer period in seconds (Default: 0.01)
-* ```sensor_timeout```: Sensor timeout in seconds in case of no movement, or sensor failure (Default: 1.0)
-* ```parent_frame```: Parent frame for the Odometry message and Transform (Default: odom)
-* ```child_frame```: Child frame for the Odometry message and transform (Default: base_link)
-* ```x_init```: Initial position in the X axis, in meters (Default: 0.0)
-* ```y_init```: Initial position in the Y axis, in meters (Default: 0.0)
-* ```z_height```: Height of the sensor from the ground, in meters (Default: 0.025)
-* ```board```: Sensor type - pmw3901 or paa5100 (Default: paa5100)
-* ```scaler```: Scaling factor, i.e. the sensor value returned for 1 pixel move (Default: 5)
-* ```spi_nr```: SPI port number (Default: 0)
-* ```spi_slot```: SPI CS pin - front (BCM pin 7 on RPi) or back (BCM pin 8 on RPi) (Default: front)
-* ```rotation```: Rotation of the sensor in 90 degree increments - 0, 90, 180, 270 (Default: 270)
-* ```publish_tf```: Boolean value to turn transform publisher on/off (Default: true)
+* ```timer_period```: Timer period in seconds (Default: ```0.01```)
+* ```sensor_timeout```: Sensor timeout in seconds in case of no movement, or sensor failure (Default: ```1.0```)
+* ```parent_frame```: Parent frame for the Odometry message and Transform (Default: ```odom```)
+* ```child_frame```: Child frame for the Odometry message and transform (Default: ```base_link```)
+* ```x_init```: Initial position in the X axis, in meters (Default: ```0.0```)
+* ```y_init```: Initial position in the Y axis, in meters (Default: ```0.0```)
+* ```z_height```: Height of the sensor from the ground, in meters (Default: ```0.025```)
+* ```board```: Sensor type - pmw3901 or paa5100 (Default: ```paa5100```)
+* ```scaler```: Scaling factor, i.e. the sensor value returned for 1 pixel move (```Default: 5```)
+* ```spi_nr```: SPI port number (Default: ```0```)
+* ```spi_slot```: SPI CS pin - front (BCM pin 7 on RPi) or back (BCM pin 8 on RPi) (Default: ```front```)
+* ```rotation```: Rotation of the sensor in 90 degree increments - 0, 90, 180, 270 (Default: ```270```)
+* ```publish_tf```: Boolean value to turn transform publisher on/off (Default: ```true```)
 
 ## How to use
 
