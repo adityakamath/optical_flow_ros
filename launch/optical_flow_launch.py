@@ -30,7 +30,7 @@ def generate_launch_description():
            
     optical_flow_node = LifecycleNode(
         package='optical_flow_ros',
-        executable='optical_flow_node',
+        executable='optical_flow_publisher',
         name='optical_flow',
         namespace='', # Do not change, else config params and remappings need to be updated
         output='screen',
