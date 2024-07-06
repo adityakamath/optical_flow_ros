@@ -18,6 +18,7 @@ import numpy as np
 from typing import Optional
 from rclpy.lifecycle import Node, Publisher, State, TransitionCallbackReturn
 from rclpy.timer import Timer
+from rclpy.exceptions import ROSInterruptException
 from rclpy.executors import ExternalShutdownException
 from rclpy.qos import qos_profile_sensor_data
 from tf2_ros import TransformBroadcaster
@@ -173,7 +174,7 @@ def main(args=None):
     
     try:
         rclpy.spin(node)
-    except KeyboardInterrupt:
+    except ROSInterruptException:
         pass
     except ExternalShutdownException:
         sys.exit(1)
