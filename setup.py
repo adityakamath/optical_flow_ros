@@ -24,8 +24,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'optical_flow_publisher = optical_flow.optical_flow_publisher:main',
-            'optical_flow_node = optical_flow.optical_flow_node:main',
+            'optical_flow_publisher = optical_flow_ros.optical_flow_publisher:main',
+            'optical_flow_node = optical_flow_ros.optical_flow_node:main',
         ],
     },
 )
