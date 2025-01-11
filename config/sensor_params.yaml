@@ -13,6 +13,3 @@ optical_flow:
         spi_slot: front # [front, back]
         rotation: 0 # [0, 90, 180, 270]
         publish_tf: true
-        min_translation_for_rotation: 0.001  # Minimum translation to update rotation (meters)
-        rotation_scale: 0.0  # Scale factor for rotation calculation
-        yaw_init: 0.0 # Initial yaw angle in radians

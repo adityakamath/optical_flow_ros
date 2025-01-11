@@ -60,63 +60,22 @@ class OpticalFlowPublisher(Node):
                 ('spi_slot', 'front'),
                 ('rotation', 0),
                 ('publish_tf', True),
-                ('min_translation_for_rotation', 0.001),
-                ('rotation_scale', 1.0),
-                ('yaw_init', 0.0),
             ]
         )
         
         self._pos_x = self.get_parameter('x_init').value
         self._pos_y = self.get_parameter('y_init').value
         self._pos_z = self.get_parameter('z_height').value
+        self._prev_x = self.get_parameter('x_init').value
+        self._prev_y = self.get_parameter('y_init').value
         self._motion_scale = self.get_parameter('motion_scale').value
         self._dt = self.get_parameter('timer_period').value
         self._sensor = None
-        
-        self._yaw = self.get_parameter('yaw_init').value
-        self._prev_yaw = self.get_parameter('yaw_init').value
-        self._prev_x = self.get_parameter('x_init').value
-        self._prev_y = self.get_parameter('y_init').value
         
         # Create fixed rotation to align frames with right-hand coordinate system
         self._rhs_coord_rot = euler2mat(pi, pi, 0, 'sxyz')  # 180° around x and y axes
         
         self.get_logger().info('Initialized')
-
-    def update_orientation(self, current_x, current_y):
-        """Calculate yaw based on motion direction"""
-        dx = current_x - self._prev_x
-        dy = current_y - self._prev_y
-        translation = (dx**2 + dy**2)**0.5
-        
-        min_translation = self.get_parameter('min_translation_for_rotation').value
-        if translation > min_translation:
-            # Calculate direction of motion
-            direction = atan2(dy, dx)
-            
-            # Update yaw - scale the change based on translation magnitude
-            # and rotation_scale parameter
-            scale = self.get_parameter('rotation_scale').value
-            yaw_change = direction - self._yaw
-            
-            # Normalize yaw change to [-pi, pi]
-            if yaw_change > pi:
-                yaw_change -= 2*pi
-            elif yaw_change < -pi:
-                yaw_change += 2*pi
-                
-            self._yaw += yaw_change * scale * (translation / min_translation)
-            
-            # Normalize final yaw to [-pi, pi]
-            if self._yaw > pi:
-                self._yaw -= 2*pi
-            elif self._yaw < -pi:
-                self._yaw += 2*pi
-            
-            self._prev_x = current_x
-            self._prev_y = current_y
-            
-        return self._yaw
 
     def publish_odom(self):
         if self._odom_pub is not None and self._odom_pub.is_activated:
@@ -136,24 +95,12 @@ class OpticalFlowPublisher(Node):
                 dist_x = -1*cf*dy
                 dist_y = cf*dx
             elif self.get_parameter('board').value == 'pmw3901':
-                # ROS and Sensor frames are assumed to align for PMW3901
+                # ROS and Sensor frames are assumed to align for PMW3901, to be tested
                 dist_x = cf*dx
                 dist_y = cf*dy
             
             self._pos_x += dist_x
             self._pos_y += dist_y
-
-            # Calculate orientation
-            self._prev_yaw = self._yaw
-            yaw = self.update_orientation(self._pos_x, self._pos_y)
-            
-            # Create base yaw rotation
-            yaw_rotation = euler2mat(0, 0, yaw, 'sxyz')
-            
-            # Combine with right-hand coordinate system rotation
-            final_rotation = np.dot(yaw_rotation, self._rhs_coord_rot)
-            q = mat2quat(final_rotation)
-            q_msg = Quaternion(x=float(q[0]), y=float(q[1]), z=float(q[2]), w=float(q[3]))
             
             odom_msg = Odometry(
                 header = Header(
@@ -163,8 +110,7 @@ class OpticalFlowPublisher(Node):
                 child_frame_id = self.get_parameter('child_frame').value,
                 pose = PoseWithCovariance(
                     pose = Pose(
-                        position = Point(x=self._pos_x, y=self._pos_y, z=self._pos_z),
-                        orientation = q_msg
+                        position = Point(x=self._pos_x, y=self._pos_y, z=self._pos_z)
                     )
                 ),
                 twist = TwistWithCovariance(
@@ -173,8 +119,7 @@ class OpticalFlowPublisher(Node):
                             x=dist_x/self._dt,
                             y=dist_y/self._dt,
                             z=0.0
-                        ),
-                        angular = Vector3(x=0.0, y=0.0, z=(yaw - self._prev_yaw)/self._dt)
+                        )
                     )
                 ),
             )
@@ -192,7 +137,6 @@ class OpticalFlowPublisher(Node):
                             y=odom_msg.pose.pose.position.y,
                             z=odom_msg.pose.pose.position.z
                         ),
-                        rotation = odom_msg.pose.pose.orientation
                     ),
                 )
                 self._tf_broadcaster.sendTransform(tf_msg)

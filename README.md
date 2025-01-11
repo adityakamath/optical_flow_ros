@@ -15,9 +15,8 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 ## Features
 
 * Publishes odometry data and transforms following ROS right-hand coordinate system conventions
-* Calculates orientation based on motion direction
 * Provides diagnostic messages for sensor health monitoring
-* Configurable motion scaling and rotation parameters
+* Configurable motion scaling parameters
 * Support for both PMW3901 and PAA5100 sensors
 
 ## Parameters
@@ -30,14 +29,11 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 * ```y_init```: Initial position in the Y axis, in meters (Default: ```0.0```)
 * ```z_height```: Height of the sensor from the ground, in meters (Default: ```0.025```)
 * ```board```: Sensor type - pmw3901 or paa5100 (Default: ```paa5100```)
-* ```scaler```: Scaling factor, i.e. the sensor value returned for 1 pixel move (```Default: 5```)
+* ```motion_scale```: Scale factor for motion calculation (Default: ```5```)
 * ```spi_nr```: SPI port number (Default: ```0```)
 * ```spi_slot```: SPI CS pin - front (BCM pin 7 on RPi) or back (BCM pin 8 on RPi) (Default: ```front```)
-* ```rotation```: Rotation of the sensor in 90 degree increments - 0, 90, 180, 270 (Default: ```270```)
+* ```rotation```: Rotation of the sensor in 90 degree increments - 0, 90, 180, 270 (Default: ```0```)
 * ```publish_tf```: Boolean value to turn transform publisher on/off (Default: ```true```)
-* ```yaw_init```: Initial yaw angle in radians (Default: ```0.0```)
-* ```min_translation_for_rotation```: Minimum translation to update rotation in meters (Default: ```0.001```)
-* ```rotation_scale```: Scale factor for rotation calculation (Default: ```1.0```)
 
 ## How to use
 
@@ -63,7 +59,6 @@ This package was tested using a [PAA5100JE Near Optical Flow sensor](https://sho
 In both cases, the output frequency of 100Hz was achieved. 
 
 ## Challenges
-
 Both these challenges are common for both PMW3901 and PAA5100 boards:
 
 * Secret sauce: the library has a lot of proprietary information which cannot be explained. The manufacturer is apparently very guarded about this information, and the only people who seem to have this information have had to sign an NDA. This includes stuff like the scaling factor to convert from pixel values to distances as well as functionality such as turning the LEDs on and off.
@@ -72,6 +67,5 @@ Both these challenges are common for both PMW3901 and PAA5100 boards:
 
 ## Additional Notes
 
-* The orientation is calculated based on the direction of motion, which can be tuned using the `rotation_scale` parameter
 * The node publishes diagnostic messages about sensor health to the `/diagnostics` topic
 * All coordinate frames follow the ROS right-hand coordinate system convention (x forward, y left, z up) according to [ROS REP 103](https://www.ros.org/reps/rep-0103.html)
