@@ -28,8 +28,8 @@ from pmw3901 import PMW3901, PAA5100, BG_CS_FRONT_BCM, BG_CS_BACK_BCM
 from diagnostic_msgs.msg import DiagnosticStatus, DiagnosticArray
 import time
 from math import atan2, cos, sin, pi
-from transforms3d.euler import euler2quat, euler2mat
-from transforms3d.quaternions import mat2quat
+from transforms3d.euler import euler2quat as quaternion_from_euler
+from optical_flow_ros.srv import ResetOdometry
 
 # hard-coded values for PAA5100 and PMW3901 (to be verified for PMW3901)
 FOV_DEG = 42.0
@@ -42,6 +42,9 @@ class OpticalFlowPublisher(Node):
         self._tf_broadcaster: Optional[TransformBroadcaster] = None
         self._timer: Optional[Timer] = None
         self._diagnostics_pub = None
+        self._last_successful_read = None
+        self._consecutive_failures = 0
+        self._reset_service = None
         
         # declare parameters and default values
         self.declare_parameters(
@@ -53,6 +56,7 @@ class OpticalFlowPublisher(Node):
                 ('child_frame', 'base_link'),
                 ('x_init', 0.0),
                 ('y_init', 0.0),
+                ('yaw_init', 0.0),
                 ('z_height', 0.025),
                 ('board', 'paa5100'),
                 ('motion_scale', 5),
@@ -60,9 +64,9 @@ class OpticalFlowPublisher(Node):
                 ('spi_slot', 'front'),
                 ('rotation', 0),
                 ('publish_tf', True),
+                ('max_consecutive_failures', 10),
                 ('min_translation_for_rotation', 0.001),
                 ('rotation_scale', 1.0),
-                ('yaw_init', 0.0),
             ]
         )
         
@@ -74,12 +78,8 @@ class OpticalFlowPublisher(Node):
         self._sensor = None
         
         self._yaw = self.get_parameter('yaw_init').value
-        self._prev_yaw = self.get_parameter('yaw_init').value
         self._prev_x = self.get_parameter('x_init').value
         self._prev_y = self.get_parameter('y_init').value
-        
-        # Create fixed rotation to align frames with right-hand coordinate system
-        self._rhs_coord_rot = euler2mat(pi, pi, 0, 'sxyz')  # 180° around x and y axes
         
         self.get_logger().info('Initialized')
 
@@ -96,7 +96,7 @@ class OpticalFlowPublisher(Node):
             
             # Update yaw - scale the change based on translation magnitude
             # and rotation_scale parameter
-            scale = self.get_parameter('rotation_scale').value
+            rotation_scale = self.get_parameter('rotation_scale').value
             yaw_change = direction - self._yaw
             
             # Normalize yaw change to [-pi, pi]
@@ -105,7 +105,7 @@ class OpticalFlowPublisher(Node):
             elif yaw_change < -pi:
                 yaw_change += 2*pi
                 
-            self._yaw += yaw_change * scale * (translation / min_translation)
+            self._yaw += yaw_change * rotation_scale * (translation / min_translation)
             
             # Normalize final yaw to [-pi, pi]
             if self._yaw > pi:
@@ -122,8 +122,17 @@ class OpticalFlowPublisher(Node):
         if self._odom_pub is not None and self._odom_pub.is_activated:
             try:
                 dx, dy = self._sensor.get_motion(timeout=self.get_parameter('sensor_timeout').value)
+                self._consecutive_failures = 0
+                self._last_successful_read = time.time()
             except (RuntimeError, AttributeError) as e:
+                self._consecutive_failures += 1
+                self.get_logger().warning(f'Sensor read failed: {str(e)}')
                 dx, dy = 0.0, 0.0
+                
+                if self._consecutive_failures >= self.get_parameter('max_consecutive_failures').value:
+                    self.get_logger().error('Too many consecutive sensor failures')
+                    self.publish_diagnostics(DiagnosticStatus.ERROR)
+                    return
 
             fov = np.radians(FOV_DEG)
             cf = self._pos_z*2*np.tan(fov/2)/(RES_PIX*self._motion_scale)
@@ -136,7 +145,7 @@ class OpticalFlowPublisher(Node):
                 dist_x = -1*cf*dy
                 dist_y = cf*dx
             elif self.get_parameter('board').value == 'pmw3901':
-                # ROS and Sensor frames are assumed to align for PMW3901
+                # ROS and Sensor frames are assumed to align for PMW3901 based on https://docs.px4.io/main/en/sensor/pmw3901.html#mounting-orientation
                 dist_x = cf*dx
                 dist_y = cf*dy
             
@@ -144,16 +153,10 @@ class OpticalFlowPublisher(Node):
             self._pos_y += dist_y
 
             # Calculate orientation
-            self._prev_yaw = self._yaw
             yaw = self.update_orientation(self._pos_x, self._pos_y)
             
-            # Create base yaw rotation
-            yaw_rotation = euler2mat(0, 0, yaw, 'sxyz')
-            
-            # Combine with right-hand coordinate system rotation
-            final_rotation = np.dot(yaw_rotation, self._rhs_coord_rot)
-            q = mat2quat(final_rotation)
-            q_msg = Quaternion(x=float(q[0]), y=float(q[1]), z=float(q[2]), w=float(q[3]))
+            # Convert yaw to quaternion (roll=0, pitch=0)
+            q = quaternion_from_euler(0.0, 0.0, yaw)
             
             odom_msg = Odometry(
                 header = Header(
@@ -164,16 +167,12 @@ class OpticalFlowPublisher(Node):
                 pose = PoseWithCovariance(
                     pose = Pose(
                         position = Point(x=self._pos_x, y=self._pos_y, z=self._pos_z),
-                        orientation = q_msg
+                        orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
                     )
                 ),
                 twist = TwistWithCovariance(
                     twist = Twist(
-                        linear = Vector3(
-                            x=dist_x/self._dt,
-                            y=dist_y/self._dt,
-                            z=0.0
-                        ),
+                        linear = Vector3(x=dist_x/self._dt, y=dist_y/self._dt, z=0.0),
                         angular = Vector3(x=0.0, y=0.0, z=(yaw - self._prev_yaw)/self._dt)
                     )
                 ),
@@ -215,6 +214,36 @@ class OpticalFlowPublisher(Node):
             msg.status = [status_msg]
             self._diagnostics_pub.publish(msg)
 
+    def reset_odometry_callback(self, request, response):
+        """Callback for reset odometry service"""
+        try:
+            if request.zero:
+                self._pos_x = 0.0
+                self._pos_y = 0.0
+                self._pos_z = 0.0
+                self._yaw = 0.0
+                self._prev_x = 0.0
+                self._prev_y = 0.0
+                response.message = "Odometry reset to zero"
+            else:
+                self._pos_x = request.x
+                self._pos_y = request.y
+                self._pos_z = request.z
+                self._yaw = request.yaw
+                self._prev_x = request.x
+                self._prev_y = request.y
+                response.message = f"Odometry reset to x:{request.x}, y:{request.y}, z:{request.z}, yaw:{request.yaw}"
+            
+            response.success = True
+            self.get_logger().info(response.message)
+            
+        except Exception as e:
+            response.success = False
+            response.message = f"Failed to reset odometry: {str(e)}"
+            self.get_logger().error(response.message)
+            
+        return response
+
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         sensor_classes = {'pmw3901': PMW3901, 'paa5100': PAA5100}
         SensorClass = sensor_classes.get(self.get_parameter('board').value)
@@ -232,6 +261,10 @@ class OpticalFlowPublisher(Node):
                     DiagnosticArray, 'diagnostics', qos_profile=qos_profile_sensor_data)
                 self._tf_broadcaster = TransformBroadcaster(self)
                 self._timer = self.create_timer(self._dt, self.publish_odom)
+                
+                # Create the reset service
+                self._reset_service = self.create_service(
+                    ResetOdometry, 'reset_odometry', self.reset_odometry_callback)
             
                 self.get_logger().info('Configured')
                 return TransitionCallbackReturn.SUCCESS
@@ -268,6 +301,8 @@ class OpticalFlowPublisher(Node):
             self.destroy_publisher(self._odom_pub)
         if self._tf_broadcaster is not None:
             del self._tf_broadcaster
+        if self._reset_service is not None:
+            self.destroy_service(self._reset_service)
 
 def main(args=None):
     rclpy.init(args=args)

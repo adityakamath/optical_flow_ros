@@ -27,6 +27,9 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 * ```spi_slot```: SPI CS pin - front (BCM pin 7 on RPi) or back (BCM pin 8 on RPi) (Default: ```front```)
 * ```rotation```: Rotation of the sensor in 90 degree increments - 0, 90, 180, 270 (Default: ```270```)
 * ```publish_tf```: Boolean value to turn transform publisher on/off (Default: ```true```)
+* ```yaw_init```: Initial yaw angle in radians (Default: ```0.0```)
+* ```min_translation_for_rotation```: Minimum translation to update rotation in meters (Default: ```0.001```)
+* ```rotation_scale```: Scale factor for rotation calculation (Default: ```1.0```)
 
 ## How to use
 
@@ -38,8 +41,9 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
   * MISO to BCM 9
   * INT to BCM 19
   * GND to any ground pin
-* Install the pmw3901-python library: ```sudo pip install pmw3901```
-* Install the RPi.GPIO library: ```sudo pip install RPi.GPIO```
+* Install the pmw3901-python library and dependencies: ```pip install pmw3901 numpy```
+* Install the RPi.GPIO library and dependencies: ```pip install RPi.GPIO gpiod gpiodevice```
+* Install the transforms3d package: ```pip install transforms3d```
 * Clone this repository in a ROS 2 workspace. Check the ```sensor_params.yaml``` file in the config directory, and make any necessary changes.
 * Build the package and run the launch file: ```ros2 launch optical_flow_ros optical_flow_launch.py```
 

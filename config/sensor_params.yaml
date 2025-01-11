@@ -4,12 +4,15 @@ optical_flow:
         sensor_timeout: 0.5
         parent_frame: odom
         child_frame: base_link
-        x_init: 0.0
-        y_init: 0.0
-        z_height: 0.025
+        x_init: 0.0 # Initial x position in meters
+        y_init: 0.0 # Initial y position in meters
+        z_height: 0.025 # Height of the sensor from the base frame in meters
         board: paa5100 # [pmw3901, paa5100]
-        scaler: 5
+        motion_scale: 5 # Scale factor for motion calculation
         spi_nr: 0
         spi_slot: front # [front, back]
         rotation: 0 # [0, 90, 180, 270]
         publish_tf: true
+        min_translation_for_rotation: 0.001  # Minimum translation to update rotation (meters)
+        rotation_scale: 0.0  # Scale factor for rotation calculation
+        yaw_init: 0.0 # Initial yaw angle in radians
