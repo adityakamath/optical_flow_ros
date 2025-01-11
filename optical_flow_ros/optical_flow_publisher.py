@@ -123,7 +123,7 @@ class OpticalFlowPublisher(Node):
         if SensorClass is not None:
             spi_slots = {'front': BG_CS_FRONT_BCM, 'back': BG_CS_BACK_BCM}
             self._sensor = SensorClass(spi_port=self.get_parameter('spi_nr').value, 
-                                        spi_cs_gpio=spi_slots.get(self.get_parameter('spi_slot').value))
+                                        spi_cs=spi_slots.get(self.get_parameter('spi_slot').value))
             self._sensor.set_rotation(self.get_parameter('rotation').value)
 
             if self._sensor is not None:
