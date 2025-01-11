@@ -73,7 +73,7 @@ class OpticalFlowPublisher(Node):
             except (RuntimeError, AttributeError):
                 dx, dy = 0.0, 0.0
 
-            fov = np.radians(FOV_DEV)
+            fov = np.radians(FOV_DEG)
             cf = self._pos_z*2*np.tan(fov/2)/(RES_PIX*self._scaler)
 
             dist_x, dist_y = 0.0, 0.0
@@ -117,7 +117,7 @@ class OpticalFlowPublisher(Node):
                 self._tf_broadcaster.sendTransform(tf_msg)
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
-        sensor_classes = {'pwm3901': PMW3901, 'paa5100': PAA5100}
+        sensor_classes = {'pmw3901': PMW3901, 'paa5100': PAA5100}
         SensorClass = sensor_classes.get(self.get_parameter('board').value)
 
         if SensorClass is not None:
