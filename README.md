@@ -12,6 +12,14 @@ Note: This implementation is a bit over-engineered, as I have been experimenting
 
 * ```optical_flow_launch.py```: This is the launch file that launches ```optical_flow_publisher``` as a  lifecycle node, loads its parameters, and then configures and activates it. The lifecycle node is first initialized, then set to 'configure' from the launch file. When the 'inactive' state is reached, the registered event handler activates the node.
 
+## Features
+
+* Publishes odometry data and transforms following ROS right-hand coordinate system conventions
+* Calculates orientation based on motion direction
+* Provides diagnostic messages for sensor health monitoring
+* Configurable motion scaling and rotation parameters
+* Support for both PMW3901 and PAA5100 sensors
+
 ## Parameters
 
 * ```timer_period```: Timer period in seconds (Default: ```0.01```)
@@ -61,3 +69,9 @@ Both these challenges are common for both PMW3901 and PAA5100 boards:
 * Secret sauce: the library has a lot of proprietary information which cannot be explained. The manufacturer is apparently very guarded about this information, and the only people who seem to have this information have had to sign an NDA. This includes stuff like the scaling factor to convert from pixel values to distances as well as functionality such as turning the LEDs on and off.
 
 * Off-centered: The sensor breakout from Pimoroni is not centered on the breakout board. Even if this offset is corrected, the aperture of the sensor itself is not centered on the sensor package. Fortunately, Pimoroni has provided [a mechanical drawing](https://cdn.shopify.com/s/files/1/0174/1800/files/39b9173de8970896f2eaa114ef5738eb993a06cc.png?v=1621246728) of the sensor breakout. 
+
+## Additional Notes
+
+* The orientation is calculated based on the direction of motion, which can be tuned using the `rotation_scale` parameter
+* The node publishes diagnostic messages about sensor health to the `/diagnostics` topic
+* All coordinate frames follow the ROS right-hand coordinate system convention (x forward, y left, z up) according to [ROS REP 103](https://www.ros.org/reps/rep-0103.html)
