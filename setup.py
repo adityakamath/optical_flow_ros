@@ -15,7 +15,7 @@ setup(
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
         (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
     ],
-    install_requires=['setuptools', 'pmw3901', 'numpy'],
+    install_requires=['pmw3901', 'numpy', 'transforms3d'],
     zip_safe=True,
     maintainer='Aditya Kamath',
     maintainer_email='adityakamath@live.com',
